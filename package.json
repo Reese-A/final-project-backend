@@ -1,0 +1,11 @@
+{
+  "name": "final-project-backend",
+  "version": "1.0.0",
+  "description": "Backend server for Dev League cohort 22 final project.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Cyrus, Jace, Ki Jung, Reese",
+  "license": "ISC"
+}
