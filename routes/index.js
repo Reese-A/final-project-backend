@@ -1,6 +1,6 @@
 const express = require('express');
 
-// const users = require('./users');
+const users = require('./users');
 // const activityLevels = require('./activity_levels');
 // const goals = require('./goals');
 // const foods = require('./foods');
@@ -9,7 +9,7 @@ const express = require('express');
 
 const router = express.Router();
 
-// router.use('/users', users);
+router.use('/users', users);
 // router.use('/activitylevels', activityLevels);
 // router.use('/goals', goals);
 // router.use('/foods', foods);
