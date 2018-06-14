@@ -6,6 +6,7 @@ const users = require('./users');
 // const foods = require('./foods');
 // const dishes = require('./dishes');
 // const categories = require('./categories');
+const images = require('./images');
 
 const router = express.Router();
 
@@ -15,5 +16,6 @@ router.use('/users', users);
 // router.use('/foods', foods);
 // router.use('/dishes', dishes);
 // router.use('/categories', categories);
+router.use('/images', images);
 
 module.exports = router;
