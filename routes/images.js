@@ -24,9 +24,6 @@ router.route('/').post(upload.array(), (req, res) => {
             features: [
               {
                 type: 'LABEL_DETECTION'
-              },
-              {
-                type: 'WEB_DETECTION'
               }
             ]
           }
