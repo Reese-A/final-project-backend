@@ -12,8 +12,7 @@ exports.up = function (knex, Promise) {
 
     table
       .integer('activity_level_id')
-      .notNullable()
-      .unique();
+      .notNullable();
     table
       .foreign('activity_level_id')
       .references('id')
@@ -21,8 +20,7 @@ exports.up = function (knex, Promise) {
 
     table
       .integer('goal_id')
-      .notNullable()
-      .unique();
+      .notNullable();
     table
       .foreign('goal_id')
       .references('id')
@@ -30,8 +28,7 @@ exports.up = function (knex, Promise) {
 
     table
       .integer('gender_id')
-      .notNullable()
-      .unique();
+      .notNullable();
     table
       .foreign('gender_id')
       .references('id')
