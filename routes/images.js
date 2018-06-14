@@ -4,7 +4,9 @@ const multer = require('multer');
 const axios = require('axios');
 
 const router = express.Router();
-const upload = multer();
+const upload = multer({
+  limits: { fieldSize: 15 * 1024 * 1024 }
+});
 
 router.route('/').post(upload.array(), (req, res) => {
   const { img_url } = req.body;
@@ -22,6 +24,9 @@ router.route('/').post(upload.array(), (req, res) => {
             features: [
               {
                 type: 'LABEL_DETECTION'
+              },
+              {
+                type: 'WEB_DETECTION'
               }
             ]
           }
@@ -29,7 +34,7 @@ router.route('/').post(upload.array(), (req, res) => {
       }
     )
     .then(result => {
-      const data = result.data.responses[0].labelAnnotations;
+      const data = result.data;
       return res.json(data);
     });
 });
