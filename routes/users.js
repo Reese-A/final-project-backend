@@ -2,15 +2,28 @@ const express = require('express');
 
 const User = require('../db/models/User');
 const User_Profile = require('../db/models/User_Profile');
+const Gender = require('../db/models/Gender');
+const Activity_Level = require('../db/models/Activity_Level');
+const Goal = require('../db/models/Goal');
 
 const router = express.Router();
 
 router.route('/')
   .post((req, res) => {
-    let { email, first_name, last_name } = req.body;
-    const { password } = req.body;
+    let {
+      email,
+      first_name,
+      last_name,
 
-    let { }
+      birthday,
+      weight,
+      height,
+      gender_id,
+      activity_level_id,
+      goal_id
+    } = req.body;
+
+    const { password } = req.body;
 
     if (email.length) {
       email = email.trim().toLowerCase();
@@ -35,6 +48,158 @@ router.route('/')
         return res.status(400).send('last_name length 0'); //change to standard message
       }
     }
+
+    if (birthday.length) {
+      birthday = Date.parse(birthday);
+      if (isNaN(birthday)) {
+        return res.status(400).send('birthday is invalid'); //change to standard message
+      }
+    }
+
+    if (weight.length) {
+      weight = Number(weight);
+
+      if (isNaN(weight)) {
+        return res.status(400).send('weight is invalid')
+      }
+    }
+
+    if (height.length) {
+      height = Number(height);
+
+      if (isNaN(height)) {
+        return res.status(400).send('height is invalid');
+      }
+    }
+
+    if (gender_id.length) {
+      gender_id = Number(gender_id);
+
+      if (isNaN(gender_id)) {
+        return res.status(400).send('gender_id is invalid');
+      }
+    }
+
+    if (activity_level_id.length) {
+      activity_level_id = Number(activity_level_id);
+
+      if (isNaN(activity_level_id)) {
+        return res.status(400).send('activity_level_id is invalid');
+      }
+    }
+
+    if (goal_id.length) {
+      goal_id = Number(goal_id);
+
+      if (isNaN(goal_id)) {
+        return res.status(400).send('goal_id is invalid');
+      }
+    }
+
+    const age = Math.floor((new Date() - birthday) * 0.00000000003171);
+    birthday = new Date(birthday);
+    let x = null;
+    let y = null;
+    let z = null;
+    let bmrEquation = null;
+
+    const userObject = {
+      email,
+      password,
+      first_name,
+      last_name,
+    }
+
+    const profileObject = {
+      birthday,
+      weight,
+      height,
+      gender_id,
+      activity_level_id,
+      goal_id,
+
+    }
+
+    return new Gender({ id: gender_id })
+      .fetch()
+      .then((gender) => {
+
+        if (!gender) {
+          return res.send('no gender in database');
+        }
+
+        if (gender.id === 1) { //male
+          x = 6.23;
+          y = 12.7;
+          z = 6.8;
+          bmrEquation = (x * weight) + (y * height) - (z * age)
+          bmrEquation += 66;
+
+        }
+
+        if (gender.id === 2) { //female
+          x = 4.35;
+          y = 4.7;
+          z = 4.7;
+          bmrEquation = (x * weight) + (y * height) - (z * age)
+          bmrEquation += 665;
+
+        }
+
+        return new Activity_Level({ id: activity_level_id })
+          .fetch()
+      })
+      .then((result) => {
+        const activityLevel = result.toJSON();
+
+        if (!activityLevel) {
+          return res.send('no activity level in database');
+        }
+
+
+        profileObject.allowance = Math.floor(bmrEquation * Number(activityLevel.modifier));
+        return new Goal({ id: goal_id })
+          .fetch()
+      })
+      .then((result) => {
+        const goal = result.toJSON();
+
+        if (!goal) {
+          return res.send('no goals in database');
+        }
+
+        profileObject.allowance += Number(goal.modifier);
+
+        return;
+      })
+      .then((profileObject) => {
+        return new User(userObject)
+          .save()
+      })
+      .then((user) => {
+        if (!user) {
+          return res.status(500).send('something went wrong with user');
+        }
+
+        return user;
+      })
+      .then((user) => {
+        profileObject.user_id = user.id;
+
+        return new User_Profile(profileObject)
+          .save()
+      })
+      .then((userProfile) => {
+        if (!userProfile) {
+          return res.status(500).send('something went wrong making the user profile')
+        }
+
+        return res.json(userProfile);
+      })
+      .catch((err) => {
+        console.log(err);
+        return res.status(400).json(err);
+      })
 
 
   })
