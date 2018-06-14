@@ -128,7 +128,7 @@ router.route('/')
           return res.send('no gender in database');
         }
 
-        if (gender.id === 1) { //male
+        if (gender.name === 'male') {
           x = 6.23;
           y = 12.7;
           z = 6.8;
@@ -137,7 +137,7 @@ router.route('/')
 
         }
 
-        if (gender.id === 2) { //female
+        if (gender.name === 'female') {
           x = 4.35;
           y = 4.7;
           z = 4.7;
@@ -200,8 +200,26 @@ router.route('/')
         console.log(err);
         return res.status(400).json(err);
       })
-
-
   })
 
+router.route('/:id')
+  .get((req, res) => {
+    const user_id = Number(req.params.id);
+
+    return new User_Profile({ user_id })
+      .fetch({
+        withRelated: ['user', 'gender', 'activity_level', 'goal']
+      })
+      .then((user) => {
+        if (!user) {
+          return res.send('no user by that id');
+        }
+
+        return user;
+      })
+      .catch((err) => {
+        console.log(err);
+        return res.status(500).json(err);
+      })
+  })
 module.exports = router;
