@@ -17,7 +17,6 @@ router.route('/').post(upload.array(), (req, res) => {
   clarifai.models
     .predict(Clarifai.FOOD_MODEL, { base64: img_url })
     .then(data => {
-      console.log(data.outputs[0].data.concepts[0].name);
       return data.outputs[0].data.concepts[0].name;
     })
     .then(food => {
@@ -37,7 +36,6 @@ router.route('/').post(upload.array(), (req, res) => {
           }
         )
         .then(result => {
-          console.log(result.data);
           return res.json(result.data);
         });
     });
