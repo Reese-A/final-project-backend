@@ -13,6 +13,7 @@
     "bcrypt": "^2.0.1",
     "body-parser": "^1.18.3",
     "bookshelf": "^0.13.3",
+    "clarifai": "^2.7.1",
     "connect-redis": "^3.3.3",
     "dotenv": "^6.0.0",
     "express": "^4.16.3",
