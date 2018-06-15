@@ -243,7 +243,7 @@ router.route('/:id')
           return res.send('no user by that id');
         }
 
-        return user;
+        return res.json(user);
       })
       .catch((err) => {
         console.log(err);
