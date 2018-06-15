@@ -1,4 +1,6 @@
 const express = require('express');
+const passport = require('passport');
+const bcrypt = require('bcrypt');
 
 const User = require('../db/models/User');
 const User_Profile = require('../db/models/User_Profile');
@@ -6,12 +8,15 @@ const Gender = require('../db/models/Gender');
 const Activity_Level = require('../db/models/Activity_Level');
 const Goal = require('../db/models/Goal');
 
+const saltedRounds = 12;
+
 const router = express.Router();
 
 router.route('/')
   .post((req, res) => {
     let {
       email,
+      password,
       first_name,
       last_name,
 
@@ -23,7 +28,9 @@ router.route('/')
       goal_id
     } = req.body;
 
-    const { password } = req.body;
+    if (!password.length) {
+      return res.status(400).send('password length 0');
+    }
 
     if (email.length) {
       email = email.trim().toLowerCase();
@@ -58,7 +65,6 @@ router.route('/')
 
     if (weight.length) {
       weight = Number(weight);
-
       if (isNaN(weight)) {
         return res.status(400).send('weight is invalid')
       }
@@ -120,30 +126,35 @@ router.route('/')
 
     }
 
-    return new Gender({ id: gender_id })
-      .fetch()
+    return bcrypt.genSalt(saltedRounds)
+      .then((salt) => {
+        return bcrypt.hash(password, salt)
+      })
+      .then((hash) => {
+        userObject.password = hash;
+        return new Gender({ id: gender_id })
+          .fetch()
+      })
       .then((gender) => {
 
         if (!gender) {
           return res.send('no gender in database');
         }
 
-        if (gender.id === 1) { //male
+        if (gender.id === 1) {
           x = 6.23;
           y = 12.7;
           z = 6.8;
           bmrEquation = (x * weight) + (y * height) - (z * age)
           bmrEquation += 66;
-
         }
 
-        if (gender.id === 2) { //female
+        if (gender.id === 2) {
           x = 4.35;
           y = 4.7;
           z = 4.7;
           bmrEquation = (x * weight) + (y * height) - (z * age)
           bmrEquation += 665;
-
         }
 
         return new Activity_Level({ id: activity_level_id })
@@ -155,7 +166,6 @@ router.route('/')
         if (!activityLevel) {
           return res.send('no activity level in database');
         }
-
 
         profileObject.allowance = Math.floor(bmrEquation * Number(activityLevel.modifier));
         return new Goal({ id: goal_id })
@@ -200,8 +210,44 @@ router.route('/')
         console.log(err);
         return res.status(400).json(err);
       })
-
-
   })
 
+router.route('/login')
+  .post(passport.authenticate('local'), (req, res) => {
+    return res.json({
+      id: req.user.id,
+      email: req.user.email,
+      first_name: req.user.first_name,
+    })
+  })
+
+router.route('/logout')
+  .get((req, res) => {
+    req.session.destroy();
+    req.logOut();
+    return res.json({
+      success: true,
+    })
+  });
+
+router.route('/:id')
+  .get((req, res) => {
+    const user_id = Number(req.params.id);
+
+    return new User_Profile({ user_id })
+      .fetch({
+        withRelated: ['user', 'gender', 'activity_level', 'goal']
+      })
+      .then((user) => {
+        if (!user) {
+          return res.send('no user by that id');
+        }
+
+        return user;
+      })
+      .catch((err) => {
+        console.log(err);
+        return res.status(500).json(err);
+      })
+  })
 module.exports = router;
