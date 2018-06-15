@@ -17,7 +17,12 @@ router.route('/').post(upload.array(), (req, res) => {
   clarifai.models
     .predict(Clarifai.FOOD_MODEL, { base64: img_url })
     .then(data => {
-      return data.outputs[0].data.concepts[0].name;
+      const foodNames = [];
+      for (let i = 0; i < 3; i++) {
+        foodNames.push(data.outputs[0].data.concepts[i].name);
+      }
+      // return data.outputs[0].data.concepts[0].name;
+      return foodNames;
     })
     .then(food => {
       console.log(food);
@@ -25,7 +30,7 @@ router.route('/').post(upload.array(), (req, res) => {
         .post(
           `https://trackapi.nutritionix.com/v2/natural/nutrients`,
           {
-            query: food
+            query: food[0]
           },
           {
             headers: {
