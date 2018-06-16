@@ -6,7 +6,8 @@ const Category = require('../db/models/Category');
 const router = express.Router();
 
 router.route('/:name').get((req, res) => {
-  const { name } = req.params;
+  let { name } = req.params;
+  name = name.toLowerCase().trim();
 
   return new Food({ name })
     .fetch({ withRelated: ['category'] })
