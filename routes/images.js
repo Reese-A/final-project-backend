@@ -15,10 +15,10 @@ const clarifai = new Clarifai.App({
 router.route('/').post(upload.array(), (req, res) => {
   const { img_url } = req.body;
   clarifai.models
-    .predict(Clarifai.FOOD_MODEL, { base64: img_url })
+    .predict('bd367be194cf45149e75f01d59f77ba7', { base64: img_url })
     .then(data => {
       const foodNames = [];
-      for (let i = 0; i < 3; i++) {
+      for (let i = 0; i < 5; i++) {
         foodNames.push(data.outputs[0].data.concepts[i].name);
       }
       // return data.outputs[0].data.concepts[0].name;
