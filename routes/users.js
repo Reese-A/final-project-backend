@@ -236,14 +236,14 @@ router.route('/:id')
 
     return new User_Profile({ user_id })
       .fetch({
-        withRelated: ['user', 'gender', 'activity_level', 'goal']
+        withRelated: ['gender', 'activity_level', 'goal']
       })
       .then((user) => {
         if (!user) {
           return res.send('no user by that id');
         }
 
-        return user;
+        return res.json(user);
       })
       .catch((err) => {
         console.log(err);
