@@ -8,8 +8,20 @@ class Dish extends bookshelf.Model {
     return true;
   }
 
-  user() {
+  posted_by() {
     return this.belongsTo('User', 'user_id');
+  }
+
+  users() {
+    return this.belongsToMany('User', 'dishes_users');
+  }
+
+  categories() {
+    return this.belongsToMany('Category', 'categories_dishes');
+  }
+
+  ingredients() {
+    return this.belongsToMany('Food', 'dishes_foods');
   }
 }
 

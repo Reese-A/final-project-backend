@@ -12,7 +12,7 @@ class User extends bookshelf.Model {
     return this.hasOne('User_Profile', 'user_id');
   }
   dishes() {
-    return this.hasMany('Dish', 'user_id');
+    return this.belongsToMany('Dish', 'dishes_users');
   }
 }
 
