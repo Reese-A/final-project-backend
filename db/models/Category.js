@@ -11,6 +11,9 @@ class Category extends bookshelf.Model {
   foods() {
     return this.hasMany('Food', 'category_id');
   }
+  dishes() {
+    return this.belongsToMany('Dish', 'categories_dishes');
+  }
 }
 
 module.exports = bookshelf.model('Category', Category);
