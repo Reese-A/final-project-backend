@@ -230,9 +230,7 @@ router.route('/logout').get((req, res) => {
 router.route('/dishes').get((req, res) => {
   const { id } = req.user;
   const start = moment(Date.now()).startOf('day');
-  // .toDate();
   const end = moment(Date.now()).endOf('day');
-  // .toDate();
   console.log(start, end);
   return new User({ id })
     .fetch({
