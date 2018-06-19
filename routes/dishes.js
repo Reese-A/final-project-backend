@@ -6,7 +6,7 @@ const Dish = require('../db/models/Dish');
 const router = express.Router();
 
 router.route('/').post((req, res) => {
-  console.log(req.body);
+  console.log('\n\n\n', req.body, '\n\n\n');
   let { foods, name } = req.body;
   const { id } = req.user;
 
@@ -33,8 +33,8 @@ router.route('/').post((req, res) => {
       })
       .then(dish => {
         foods.forEach(food => {
-          new Dish({ id: dish.id }).ingredients().attach(food);
-          return new Food({ id: food })
+          new Dish({ id: dish.id }).ingredients().attach(food.id);
+          return new Food({ id: food.id })
             .fetch({ withRelated: ['category'] })
             .then(food => {
               console.log('food data', food);

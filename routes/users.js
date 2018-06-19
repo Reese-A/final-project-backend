@@ -1,12 +1,14 @@
 const express = require('express');
 const passport = require('passport');
 const bcrypt = require('bcrypt');
+const moment = require('moment');
 
 const User = require('../db/models/User');
 const User_Profile = require('../db/models/User_Profile');
 const Gender = require('../db/models/Gender');
 const Activity_Level = require('../db/models/Activity_Level');
 const Goal = require('../db/models/Goal');
+const Dish = require('../db/models/Dish');
 
 const saltedRounds = 12;
 
@@ -227,11 +229,46 @@ router.route('/logout').get((req, res) => {
 
 router.route('/dishes').get((req, res) => {
   const { id } = req.user;
-
-  return new User({ id: id })
-    .fetch({ withRelated: ['dishes.ingredients'] })
+  const start = moment(Date.now()).startOf('day');
+  const end = moment(Date.now()).endOf('day');
+  console.log(start, end);
+  return new User({ id })
+    .fetch({
+      withRelated: [
+        {
+          dishes: qb => {
+            qb.whereBetween('dishes.created_at', [start, end]);
+          }
+        }
+      ]
+    })
     .then(user => {
-      return res.json(user);
+      const dishes = user.toJSON().dishes;
+      const promises = [];
+      dishes.forEach(dish => {
+        promises.push(
+          new Dish({ id: dish.id })
+            .fetch({
+              withRelated: ['ingredients']
+            })
+            .then(dish => {
+              return dish;
+            })
+            .catch(err => {
+              console.log(err);
+            })
+        );
+      });
+      return promises;
+    })
+    .then(promises => {
+      return Promise.all(promises);
+    })
+    .then(data => {
+      return res.json(data);
+    })
+    .catch(err => {
+      console.log(err);
     });
 });
 
