@@ -9,6 +9,7 @@ const dishes = require('./dishes');
 const images = require('./images');
 const genders = require('./genders');
 const goals = require('./goals');
+const oauth = require('./oauth');
 
 const router = express.Router();
 
@@ -21,5 +22,6 @@ router.use('/dishes', dishes);
 router.use('/images', images);
 router.use('/genders', genders);
 router.use('/goals', goals);
+router.use('/oauth', oauth);
 
 module.exports = router;
