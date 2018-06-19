@@ -229,14 +229,9 @@ router.route('/logout').get((req, res) => {
 
 router.route('/dishes').get((req, res) => {
   const { id } = req.user;
-  const start = moment
-    .utc()
-    .startOf('day')
-    .toDate();
-  const end = moment
-    .utc()
-    .endOf('day')
-    .toDate();
+  const start = moment(Date.now()).startOf('day');
+  const end = moment(Date.now()).endOf('day');
+  console.log(start, end);
   return new User({ id })
     .fetch({
       withRelated: [
@@ -249,7 +244,6 @@ router.route('/dishes').get((req, res) => {
     })
     .then(user => {
       const dishes = user.toJSON().dishes;
-      console.log(dishes);
       const promises = [];
       dishes.forEach(dish => {
         promises.push(
