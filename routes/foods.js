@@ -32,13 +32,16 @@ router.route('/:name').get((req, res) => {
           }
         )
         .then(result => {
+          let category = result.data.foods[0].tags.food_group
+            ? result.data.foods[0].tags.food_group
+            : 9;
           const newFood = {
             name: result.data.foods[0].food_name,
             calories: Math.round(result.data.foods[0].nf_calories),
             carb: Math.round(result.data.foods[0].nf_total_carbohydrate),
             fat: Math.round(result.data.foods[0].nf_total_fat),
             protein: Math.round(result.data.foods[0].nf_protein),
-            category_id: result.data.foods[0].tags.food_group,
+            category_id: category,
             serving_size: result.data.foods[0].serving_unit,
             serving_grams: Math.round(
               Number(result.data.foods[0].serving_weight_grams)
