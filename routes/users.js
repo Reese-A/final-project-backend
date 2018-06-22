@@ -27,7 +27,8 @@ router.route('/').post((req, res) => {
     height,
     gender_id,
     activity_level_id,
-    goal_id
+    goal_id,
+    default_profile
   } = req.body;
 
   if (!password.length) {
@@ -124,7 +125,8 @@ router.route('/').post((req, res) => {
     height,
     gender_id,
     activity_level_id,
-    goal_id
+    goal_id,
+    default_profile
   };
 
   return bcrypt
@@ -424,7 +426,7 @@ router.route('/:id/profile')
               goal_id: profileObject.goal_id,
               activity_level_id: profileObject.activity_level_id,
               allowance: profileObject.allowance,
-              default: false
+              default_profile: false
             },
             { method: 'update' }
           );
