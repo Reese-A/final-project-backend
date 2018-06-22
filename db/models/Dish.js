@@ -21,7 +21,7 @@ class Dish extends bookshelf.Model {
   }
 
   ingredients() {
-    return this.belongsToMany('Food', 'dishes_foods');
+    return this.belongsToMany('Food', 'dishes_foods').withPivot('servings');
   }
 }
 
