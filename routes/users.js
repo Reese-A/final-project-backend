@@ -2,6 +2,7 @@ const express = require('express');
 const passport = require('passport');
 const bcrypt = require('bcrypt');
 const moment = require('moment');
+const _ = require('underscore');
 
 const User = require('../db/models/User');
 const User_Profile = require('../db/models/User_Profile');
@@ -26,7 +27,8 @@ router.route('/').post((req, res) => {
     height,
     gender_id,
     activity_level_id,
-    goal_id
+    goal_id,
+    default_profile
   } = req.body;
 
   if (!password.length) {
@@ -123,7 +125,8 @@ router.route('/').post((req, res) => {
     height,
     gender_id,
     activity_level_id,
-    goal_id
+    goal_id,
+    default_profile
   };
 
   return bcrypt
@@ -272,24 +275,174 @@ router.route('/dishes').get((req, res) => {
     });
 });
 
-router.route('/:id').get((req, res) => {
-  const user_id = Number(req.params.id);
+router.route('/:id')
+  .get((req, res) => {
+    const user_id = Number(req.params.id);
 
-  return new User_Profile({ user_id })
-    .fetch({
-      withRelated: ['gender', 'activity_level', 'goal']
-    })
-    .then(user => {
-      if (!user) {
-        return res.send('no user by that id');
+    return new User_Profile({ user_id })
+      .fetch({
+        withRelated: ['gender', 'activity_level', 'goal']
+      })
+      .then(user => {
+        console.log('fetched user', user);
+        if (!user) {
+          return res.send('no user by that id');
+        }
+
+        return res.json(user);
+      })
+      .catch(err => {
+        console.log(err);
+        return res.status(500).json(err);
+      });
+  });
+router.route('/:id/profile')
+  .put((req, res) => {
+    const user_id = Number(req.params.id);
+
+    let {
+      activity_level_id,
+      gender_id,
+      goal_id,
+      birthday,
+      weight,
+      height
+    } = req.body;
+
+    if (birthday.length) {
+      birthday = Date.parse(birthday);
+      if (isNaN(birthday)) {
+        return res.status(400).send('birthday is invalid');
       }
+    }
 
-      return res.json(user);
-    })
-    .catch(err => {
-      console.log(err);
-      return res.status(500).json(err);
-    });
-});
+    if (weight.length) {
+      weight = Number(weight);
+      if (isNaN(weight)) {
+        return res.status(400).send('weight is invalid');
+      }
+    }
+
+    if (height.length) {
+      height = Number(height);
+
+      if (isNaN(height)) {
+        return res.status(400).send('height is invalid');
+      }
+    }
+
+    if (gender_id.length) {
+      gender_id = Number(gender_id);
+
+      if (isNaN(gender_id)) {
+        return res.status(400).send('gender_id is invalid');
+      }
+    }
+
+    if (activity_level_id.length) {
+      activity_level_id = Number(activity_level_id);
+
+      if (isNaN(activity_level_id)) {
+        return res.status(400).send('activity_level_id is invalid');
+      }
+    }
+
+    if (goal_id.length) {
+      goal_id = Number(goal_id);
+
+      if (isNaN(goal_id)) {
+        return res.status(400).send('goal_id is invalid');
+      }
+    }
+
+    const age = Math.floor((new Date() - birthday) * 0.00000000003171);
+    birthday = new Date(birthday);
+    let x = null;
+    let y = null;
+    let z = null;
+    let bmrEquation = null;
+
+    const profileObject = {
+      birthday,
+      height,
+      weight,
+      gender_id,
+      goal_id,
+      activity_level_id,
+    };
+
+    return new Gender({ id: gender_id }).fetch()
+      .then(gender => {
+        if (!gender) {
+          return res.send('no gender in database');
+        }
+
+        if (gender.id === 1) {
+          x = 6.23;
+          y = 12.7;
+          z = 6.8;
+          bmrEquation = x * weight + y * height - z * age;
+          bmrEquation += 66;
+        }
+
+        if (gender.id === 2) {
+          x = 4.35;
+          y = 4.7;
+          z = 4.7;
+          bmrEquation = x * weight + y * height - z * age;
+          bmrEquation += 665;
+        }
+
+        return new Activity_Level({ id: activity_level_id }).fetch();
+      })
+      .then(result => {
+        const activityLevel = result.toJSON();
+        if (!activityLevel) {
+          return res.send('no activity level in database');
+        }
+
+        profileObject.allowance = Math.floor(
+          bmrEquation * Number(activityLevel.modifier)
+        );
+
+        return new Goal({ id: goal_id }).fetch();
+      })
+      .then(result => {
+        const goal = result.toJSON();
+        if (!goal) {
+          return res.send('no goals in database');
+        }
+
+        profileObject.allowance += Number(goal.modifier);
+
+        return new User_Profile()
+          .where({ user_id })
+          .save(
+            {
+              birthday: profileObject.birthday,
+              weight: profileObject.weight,
+              height: profileObject.height,
+              gender_id: profileObject.gender_id,
+              goal_id: profileObject.goal_id,
+              activity_level_id: profileObject.activity_level_id,
+              allowance: profileObject.allowance,
+              default_profile: false
+            },
+            { method: 'update' }
+          );
+      })
+      .then(userProfile => {
+        if (!userProfile) {
+          return res
+            .status(500)
+            .send('something went wrong making the user profile');
+        }
+        return res.json(userProfile);
+      })
+      .catch(err => {
+        console.log(err);
+        return res.status(400).json(err);
+      });
+  });
 
 module.exports = router;
