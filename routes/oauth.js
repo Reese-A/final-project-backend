@@ -10,10 +10,16 @@ router.route('/google/token')
   return new User({ id })
   .fetch()
   .then(user => {
-    return res.json(user)
+    const access_token = user.attributes.access_token;
+    if (!access_token) {
+      return res.status(500)
+    }
+    console.log('user token', user);
+    console.log('access tokennnnnn', access_token);
+    return res.json(access_token)
   })
   .catch(err => {
-    console.log(err); 
+    return res.status(500).json(err);
   })
 })
 .put((req, res) => {
