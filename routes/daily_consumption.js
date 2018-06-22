@@ -9,13 +9,13 @@ router
   .route('/')
 
   .get((req, res) => {
-    // const id = req.user.id;
+    const id = req.user.id;
 
     const start = moment(Date.now()).startOf('day');
     const end = moment(Date.now()).endOf('day');
     return new Daily_Consumption()
       .query(qb => {
-        qb.where({ user_id: 1 });
+        qb.where({ user_id: id });
         qb.whereBetween('created_at', [start, end]);
       })
       .fetch()
@@ -31,13 +31,13 @@ router
   })
 
   .post((req, res) => {
-    // const id = req.user.id;
+    const id = req.user.id;
     let { calories } = req.body;
     const start = moment(Date.now()).startOf('day');
     const end = moment(Date.now()).endOf('day');
     return new Daily_Consumption()
       .query(qb => {
-        qb.where({ user_id: 1 });
+        qb.where({ user_id: id });
         qb.whereBetween('created_at', [start, end]);
       })
       .fetch()
@@ -67,7 +67,7 @@ router
             calories = 0;
           }
           return new Daily_Consumption({
-            user_id: 1,
+            user_id: id,
             total_calories: calories,
             tracked_calories: [calories]
           })
