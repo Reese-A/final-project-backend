@@ -14,8 +14,6 @@ router.route('/google/token')
     if (!access_token) {
       return res.status(500)
     }
-    console.log('user token', user);
-    console.log('access tokennnnnn', access_token);
     return res.json(access_token)
   })
   .catch(err => {
