@@ -16,12 +16,14 @@ const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-app.use(session({
-  store: new Redis(),
-  secret: 'keyboard cat',
-  resave: false,
-  saveUninitialized: true,
-}));
+app.use(
+  session({
+    store: new Redis(),
+    secret: 'keyboard cat',
+    resave: false,
+    saveUninitialized: true
+  })
+);
 
 app.use(passport.initialize());
 app.use(passport.session());
@@ -38,56 +40,69 @@ passport.deserializeUser((user, done) => {
   console.log('deserializing');
   new User({
     id: user.id
-  }).fetch()
-    .then((user) => {
+  })
+    .fetch()
+    .then(user => {
       user = user.toJSON();
       return done(null, {
         id: user.id,
         username: user.username
       });
     })
-    .catch((err => {
+    .catch(err => {
       console.log(err);
       return done(err);
-    }));
+    });
 });
 
-passport.use(new LocalStrategy({ usernameField: 'email' }, function (email, password, done) {
-  return new User({ email })
-    .fetch()
-    .then(user => {
-      user = user.toJSON();
-      console.log(user);
+passport.use(
+  new LocalStrategy({ usernameField: 'email' }, function(
+    email,
+    password,
+    done
+  ) {
+    return new User({ email })
+      .fetch()
+      .then(user => {
+        user = user.toJSON();
+        console.log(user);
 
-      if (user === null) {
-        return done(null, false, {
-          message: 'bad username or password'
-        });
-      } else {
-        console.log(password, user.password);
-        bcrypt.compare(password, user.password)
-          .then(res => {
+        if (user === null) {
+          return done(null, false, {
+            message: 'bad username or password'
+          });
+        } else {
+          console.log(password, user.password);
+          bcrypt.compare(password, user.password).then(res => {
             if (res) {
               console.log(res);
               return done(null, user);
             } else {
               return done(null, false, {
-                message: 'Bad usernmae or password'
+                message: 'Bad username or password'
               });
             }
           });
-      }
-    })
-    .catch(err => {
-      console.log('error', err);
-      return done(err);
-    })
-}));
+        }
+      })
+      .catch(err => {
+        console.log('error', err);
+        return done(err);
+      });
+  })
+);
+
+const staticDir = process.env.NODE_ENV === 'production' ? 'build' : 'public';
+
+app.use(express.static(staticDir));
 
 app.use('/api', routes);
 
-app.get('*', (request, response) => {
-  return response.send('Smoke test');
+app.get('/*', function(req, res) {
+  res.sendFile(path.join(__dirname, '../build/index.html'), function(err) {
+    if (err) {
+      res.status(500).send(err);
+    }
+  });
 });
-
 module.exports = app;
