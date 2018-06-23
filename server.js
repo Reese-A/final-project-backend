@@ -13,6 +13,8 @@ const routes = require('./routes');
 
 const app = express();
 
+app.use(express.static('public'));
+
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
@@ -56,7 +58,7 @@ passport.deserializeUser((user, done) => {
 });
 
 passport.use(
-  new LocalStrategy({ usernameField: 'email' }, function(
+  new LocalStrategy({ usernameField: 'email' }, function (
     email,
     password,
     done
@@ -92,17 +94,14 @@ passport.use(
   })
 );
 
-const staticDir = process.env.NODE_ENV === 'production' ? 'build' : 'public';
-
-app.use(express.static(staticDir));
-
 app.use('/api', routes);
 
-app.get('/*', function(req, res) {
-  res.sendFile(path.join(__dirname, '../build/index.html'), function(err) {
+app.get('*', function (req, res) {
+  res.sendFile(path.join(__dirname, '/public/index.html'), function (err) {
     if (err) {
       res.status(500).send(err);
     }
   });
 });
+
 module.exports = app;
