@@ -10,6 +10,7 @@ const Redis = require('connect-redis')(session);
 
 const User = require('./db/models/User');
 const routes = require('./routes');
+const path = require('path');
 
 const app = express();
 
@@ -58,7 +59,7 @@ passport.deserializeUser((user, done) => {
 });
 
 passport.use(
-  new LocalStrategy({ usernameField: 'email' }, function (
+  new LocalStrategy({ usernameField: 'email' }, function(
     email,
     password,
     done
@@ -96,8 +97,8 @@ passport.use(
 
 app.use('/api', routes);
 
-app.get('*', function (req, res) {
-  res.sendFile(path.join(__dirname, '/public/index.html'), function (err) {
+app.get('*', function(req, res) {
+  res.sendFile(path.join(__dirname, '/public/index.html'), function(err) {
     if (err) {
       res.status(500).send(err);
     }
