@@ -1,0 +1,3 @@
+psql -f db/setup/setup.sql
+knex migrate:latest
+knex seed:run
