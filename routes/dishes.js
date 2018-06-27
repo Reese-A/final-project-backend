@@ -8,11 +8,12 @@ const router = express.Router();
 
 router.route('/').post((req, res) => {
   console.log('\n\n\n', req.body, '\n\n\n');
-  let { foods, name } = req.body;
+  let { name, calories, foods } = req.body;
   const { id } = req.user;
 
   return new Dish({
     name,
+    calories,
     user_id: id
   })
     .save()
