@@ -3,6 +3,7 @@ const express = require('express');
 const router = express.Router();
 
 const User = require('../db/models/User');
+const User_Profile = require('../db/models/User_Profile');
 
 router.route('/google/token')
 .get((req, res) => {
@@ -22,15 +23,27 @@ router.route('/google/token')
 })
 .put((req, res) => {
   const { access_token } = req.body.tokenObj;
-  const { email } = req.body.profileObj;
+  const { id } = req.user;
   return new User()
-  .where({ email })
+  .where({ id })
   .save(
-    { access_token }, 
+    { 
+      access_token
+     }, 
     { method: 'update' }
   )
   .then(user => {
-    return res.json(user);
+    return new User_Profile()
+    .where({ user_id: id})
+    .save(
+      {
+        google_fit: true
+      },
+      { method: 'update' }
+    )
+  })
+  .then(user_profile => {
+    return res.json(user_profile);
   })
   .catch(err => {
     console.log(err);
