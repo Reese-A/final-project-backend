@@ -23,7 +23,7 @@ router
         if (daily_consumption) {
           return res.json(daily_consumption);
         }
-        return res.json(null);
+        return res.json({});
       })
       .catch(err => {
         console.log(err);
@@ -46,22 +46,24 @@ router
           const dailyJson = daily_consumption.toJSON();
           if (!dailyJson.tracked_calories.includes(calories)) {
             const newCalories = [...dailyJson.tracked_calories, calories];
+            const newTimes = [...dailyJson.tracked_times, Date.now()];
             daily_consumption
               .save(
                 {
                   total_calories: calories,
-                  tracked_calories: newCalories
+                  tracked_calories: newCalories,
+                  tracked_times: newTimes
                 },
                 { method: 'update' }
               )
               .then(daily_consumption => {
+                console.log(daily_consumption.toJSON());
                 return res.json(daily_consumption);
               })
               .catch(err => {
                 console.log(err);
               });
           }
-          return res.json(daily_consumption);
         } else {
           if (!calories) {
             calories = 0;
@@ -69,7 +71,8 @@ router
           return new Daily_Consumption({
             user_id: id,
             total_calories: calories,
-            tracked_calories: [calories]
+            tracked_calories: [calories],
+            tracked_times: [Date.now()]
           })
             .save()
             .then(daily_consumption => {
