@@ -1,7 +1,6 @@
 const path = require('path');
 
 module.exports = {
-
   development: {
     client: 'postgresql',
     connection: {
@@ -20,8 +19,8 @@ module.exports = {
     },
     seeds: {
       directory: path.join(__dirname, 'db', 'seeds')
-    },
-    debug: true
+    }
+    // debug: true
   },
 
   staging: {
@@ -55,5 +54,4 @@ module.exports = {
       tableName: 'knex_migrations'
     }
   }
-
 };
