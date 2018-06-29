@@ -8,6 +8,7 @@ exports.up = function(knex, Promise) {
       .inTable('users');
     table.decimal('total_calories', 9, 3).notNullable();
     table.specificType('tracked_calories', 'decimal[]');
+    table.specificType('tracked_times', 'bigint[]');
     table.timestamps(true, true);
   });
 };
