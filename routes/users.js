@@ -251,7 +251,7 @@ router.route('/dishes').get((req, res) => {
         promises.push(
           new Dish({ id: dish.id })
             .fetch({
-              withRelated: ['ingredients']
+              withRelated: ['ingredients', 'posted_by']
             })
             .then(dish => {
               return dish;
